@@ -2,8 +2,8 @@ import { AwsClient } from "aws4fetch";
 import { path_join } from "./path";
 
 export function createS3Client(env: Env): AwsClient {
-    const accessKeyId = env.S3_ACCESS_KEY_ID;
-    const secretAccessKey = env.S3_SECRET_ACCESS_KEY;
+    const accessKeyId = env.S3_ACCESS_KEY_ID ?? '';
+    const secretAccessKey = env.S3_SECRET_ACCESS_KEY ?? '';
     
     return new AwsClient({
         accessKeyId,
@@ -19,8 +19,8 @@ export async function putObject(
     body: Blob | ArrayBuffer | Uint8Array | string,
     contentType?: string
 ) {
-    const endpoint = env.S3_ENDPOINT;
-    const bucket = env.S3_BUCKET;
+    const endpoint = env.S3_ENDPOINT ?? '';
+    const bucket = env.S3_BUCKET ?? '';
     const forcePathStyle = env.S3_FORCE_PATH_STYLE === 'true';
 
     // Construct URL based on path-style or virtual-hosted style
@@ -52,8 +52,8 @@ export async function putObject(
 }
 
 export function buildS3ObjectUrl(env: Env, key: string): string {
-    const endpoint = env.S3_ENDPOINT;
-    const bucket = env.S3_BUCKET;
+    const endpoint = env.S3_ENDPOINT ?? '';
+    const bucket = env.S3_BUCKET ?? '';
     const forcePathStyle = env.S3_FORCE_PATH_STYLE === 'true';
 
     if (forcePathStyle) {
