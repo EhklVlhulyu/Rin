@@ -17,7 +17,6 @@
     "check": "tsc --noEmit"
   },
   "devDependencies": {
-    "@types/webdav": "^4.0.5",
     "@types/bun": "^1.1.2",
     "drizzle-kit": "^0.21.2",
     "@cloudflare/vitest-pool-workers": "^0.1.0",
