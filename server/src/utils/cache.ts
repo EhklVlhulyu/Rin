@@ -130,6 +130,49 @@ class DatabaseStorageProvider implements StorageProvider {
 }
 
 // S3 存储提供者
+
+class WebDAVStorageProvider implements StorageProvider {
+    private cacheKey: string;
+    constructor(private env: Env, private cacheMap: Map<string, any>, private type: string) {
+        this.cacheKey = path_join(this.env.WEBDAV_FOLDER || 'cache', `${type}.json`);
+    }
+    async load(): Promise<void> {
+        console.log('Cache load from WebDAV', this.cacheKey);
+        try {
+            const { createWebDAVClient, getWebDAVObject } = await import('./webdav');
+            const client = createWebDAVClient(this.env);
+            const data = await getWebDAVObject(client, this.cacheKey);
+            if (!data) {
+                console.log('Cache file not found in WebDAV, starting with empty cache');
+                return;
+            }
+            const json = JSON.parse(data.toString());
+            for (let key in json) {
+                this.cacheMap.set(key, json[key]);
+            }
+        } catch (e: any) {
+            console.error('Cache load from WebDAV failed');
+            console.error(e.message);
+        }
+    }
+    async save(): Promise<void> {
+        try {
+            const { createWebDAVClient, putWebDAVObject } = await import('./webdav');
+            const client = createWebDAVClient(this.env);
+            await putWebDAVObject(client, this.cacheKey, JSON.stringify(Object.fromEntries(this.cacheMap)), 'application/json');
+            console.log('Cache saved to WebDAV');
+        } catch (e: any) {
+            console.error('Cache save to WebDAV failed');
+            console.error(e.message);
+        }
+    }
+    async delete(): Promise<void> {
+        await this.save();
+    }
+    async clear(): Promise<void> {
+        await this.save();
+    }
+}
 class S3StorageProvider implements StorageProvider {
     private cacheKey: string;
 
@@ -211,10 +254,11 @@ export class CacheImpl {
         this.configReader = configReader;
 
         // 优先级：参数 > 环境变量，默认为 s3 以向前兼容
-        const mode = storageMode ?? (env.CACHE_STORAGE_MODE as CacheStorageMode) ?? 's3';
-
+        const mode = storageMode ?? (env.CACHE_STORAGE_MODE as CacheStorageMode) ?? (env.STORAGE_TYPE === 'webdav' ? 'webdav' : 's3');
         // 根据存储模式创建对应的提供者
-        if (mode === 's3') {
+        if (mode === 'webdav') {
+            this.storageProvider = new WebDAVStorageProvider(env, this.cache, type);
+        } else if (mode === 's3') {
             this.storageProvider = new S3StorageProvider(env, this.cache, type);
         } else {
             this.storageProvider = new DatabaseStorageProvider(db, this.cache, type);
