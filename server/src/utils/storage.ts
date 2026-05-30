@@ -106,6 +106,7 @@ function createStorageResponse(object: R2ObjectBody | R2Object, body?: BodyInit 
   });
 }
 
+export async function getStorageObject(env: Env, storageKey: string) {
   const target = resolveStorageTarget(env);
   if (target.type === 'r2') {
     const object = await target.bucket.get(storageKey);
@@ -115,7 +116,6 @@ function createStorageResponse(object: R2ObjectBody | R2Object, body?: BodyInit 
     const client = createWebDAVClient(env);
     const data = await getWebDAVObject(client, path_join(target.folder, storageKey));
     if (!data) return null;
-    // WebDAV 返回 Buffer，需包装为 Response
     return new Response(data);
   } else {
     const client = createS3Client(env);
@@ -126,6 +126,7 @@ function createStorageResponse(object: R2ObjectBody | R2Object, body?: BodyInit 
   }
 }
 
+export async function headStorageObject(env: Env, storageKey: string) {
   const target = resolveStorageTarget(env);
   if (target.type === 'r2') {
     const object = await target.bucket.head(storageKey);
@@ -135,7 +136,6 @@ function createStorageResponse(object: R2ObjectBody | R2Object, body?: BodyInit 
     const client = createWebDAVClient(env);
     const stat = await headWebDAVObject(client, path_join(target.folder, storageKey));
     if (!stat) return null;
-    // WebDAV stat 返回对象，简单包装
     return new Response(null, { status: 200, headers: { 'Content-Length': stat.size?.toString() || '0', 'Last-Modified': stat.lastmod || '' } });
   } else {
     const client = createS3Client(env);
@@ -167,6 +167,7 @@ export async function putStorageObject(
   return putStorageObjectAtKey(env, storageKey, body, contentType, baseUrl);
 }
 
+export async function putStorageObjectAtKey(
   env: Env,
   storageKey: string,
   body: Blob | ArrayBuffer | Uint8Array | string,
