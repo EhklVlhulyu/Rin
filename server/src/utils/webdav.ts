@@ -8,8 +8,13 @@ export function createWebDAVClient(env: Env) {
 	return createClient(url, { username, password });
 }
 
-export async function putWebDAVObject(client: any, key: string, body: Buffer | string, contentType?: string) {
-	await client.putFileContents(key, body, { overwrite: true, headers: contentType ? { 'Content-Type': contentType } : undefined });
+export async function putWebDAVObject(
+  client: any,
+  key: string,
+  body: string | Uint8Array,
+  contentType?: string
+) {
+  await client.putFileContents(key, body, { overwrite: true, headers: contentType ? { 'Content-Type': contentType } : undefined });
 }
 
 export async function getWebDAVObject(client: any, key: string) {
