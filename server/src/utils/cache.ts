@@ -6,7 +6,7 @@ import { getStorageObject, putStorageObjectAtKey } from "./storage";
 
 // Cache Utils for storing data in memory and persisting to database (with optional S3 backup)
 
-export type CacheStorageMode = 'database' | 's3';
+export type CacheStorageMode = 'database' | 's3' | 'webdav';
 
 type CacheConfigReader = {
     getOrDefault<T>(key: string, defaultValue: T): Promise<T>;
