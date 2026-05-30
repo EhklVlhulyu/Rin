@@ -181,20 +181,19 @@ export async function putStorageObjectAtKey(
     });
   } else if (target.type === 'webdav') {
     const client = createWebDAVClient(env);
-  let data: string | Uint8Array;
-  if (typeof body === 'string') {
-    data = body;
-  } else if (body instanceof Uint8Array) {
-    data = body;
-  } else if (body instanceof ArrayBuffer) {
-    data = new Uint8Array(body);
-  } else if (typeof Blob !== 'undefined' && body instanceof Blob) {
-    data = new Uint8Array(await (body as Blob).arrayBuffer());
-  } else {
-    throw new Error('Unsupported body type for WebDAV upload');
-  }
-  await putWebDAVObject(client, path_join(target.folder, storageKey), data, contentType);
-}
+    let data: string | Uint8Array;
+    if (typeof body === 'string') {
+      data = body;
+    } else if (body instanceof Uint8Array) {
+      data = body;
+    } else if (body instanceof ArrayBuffer) {
+      data = new Uint8Array(body);
+    } else if (typeof Blob !== 'undefined' && body instanceof Blob) {
+      data = new Uint8Array(await (body as Blob).arrayBuffer());
+    } else {
+      throw new Error('Unsupported body type for WebDAV upload');
+    }
+    await putWebDAVObject(client, path_join(target.folder, storageKey), data, contentType);
   } else {
     const client = createS3Client(env);
     await putS3Object(client, env, storageKey, body, contentType);
