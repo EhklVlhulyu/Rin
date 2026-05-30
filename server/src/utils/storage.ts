@@ -181,8 +181,6 @@ export async function putStorageObjectAtKey(
     });
   } else if (target.type === 'webdav') {
     const client = createWebDAVClient(env);
-else if (target.type === 'webdav') {
-  const client = createWebDAVClient(env);
   let data: string | Uint8Array;
   if (typeof body === 'string') {
     data = body;
